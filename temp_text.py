@@ -1,7 +1,8 @@
 import Adafruit_DHT
 from twilio.rest import Client
 import time
-from variables import * 
+from variables import *
+import schedule
 
 # Set sensor type : Options are DHT11,DHT22 or AM2302
 sensor=Adafruit_DHT.DHT11
@@ -9,9 +10,11 @@ sensor=Adafruit_DHT.DHT11
 # Set GPIO sensor is connected to
 gpio=17
 temperature = 0
+humidity = 0
 # Use read_retry method. This will retry up to 15 times to
 # get a sensor reading (waiting 2 seconds between each retry).
-humidity, temperature = Adafruit_DHT.read_retry(sensor, gpio)
+def get_temp():
+    humidity, temperature = Adafruit_DHT.read_retry(sensor, gpio)
  
 # Reading the DHT11 is very sensitive to timings and occasionally
 # the Pi might fail to get a valid reading. So check if readings are valid.
@@ -22,7 +25,7 @@ humidity, temperature = Adafruit_DHT.read_retry(sensor, gpio)
 #   print('Failed to get reading. Try again!')
 
 
-destination_phone_number = input("Phone number to send results to?")
+destination_phone_number = str("+1" + input("Phone number to send results to?"))
 client = Client(account_sid, auth_token)
 # message = client.messages \
 #     .create(
@@ -31,4 +34,7 @@ client = Client(account_sid, auth_token)
 #         to=destination_phone_number
 #     )
 
-client.messages.create(body="The temperature today is " + temperature,to=destination_phone_number,from_=twilio_phone_number)
+def send_text():
+    client.messages.create(body="The temperature today is " + temperature,to=destination_phone_number,from_=twilio_phone_number)
+
+schedule.every().day.at("7:00").do(get_temp, send_text)
