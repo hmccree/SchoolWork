@@ -25,7 +25,7 @@ def get_temp():
 #   print('Failed to get reading. Try again!')
 
 
-destination_phone_number = str("+1" + input("Phone number to send results to?"))
+destination_phone_number = str(input("Phone number to send results to?"))
 client = Client(account_sid, auth_token)
 # message = client.messages \
 #     .create(
@@ -37,4 +37,5 @@ client = Client(account_sid, auth_token)
 def send_text():
     client.messages.create(body="The temperature today is " + temperature,to=destination_phone_number,from_=twilio_phone_number)
 
-schedule.every().day.at("7:00").do(get_temp, send_text)
+schedule.every().day.at("7:00").do(get_temp)
+schedule.every().day.at("7:00").do(send_text)
